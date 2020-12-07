@@ -20,22 +20,37 @@ You can do numbers like this:
 Load any required packages in a code chunk (you may need to install some packages):
 
 ```{r, message=F, warning=F}
-library(leaflet)
 library(ggplot2)
-library(ggmap)
-library(tidyverse)
-library(mapview)
-library(leafpop)
 library(sf)
 library(sp)
-library(lubridate)
 library(kableExtra)
 ```
 
 ## Download and clean all required data
-```{r}
+```{r, message=F, warning=F}
+d=read_csv("https://data.buffalony.gov/api/views/5c88-nfii/rows.csv?accessType=DOWNLOAD")
 ```
 
+```{r}
+register_google(key="AIzaSyBwx-V5LX87HHOD8ohrW604a9QgW2tCPWk",write=TRUE)
+```
+```{r}
+plot1 <- ggplot(d,aes(LONGITUDE,LATITUDE))+geom_point()
+plot1
+```
+
+```{r}
+library(tidyverse)
+library(ggmap)
+?get_map
+buffalo_map <- get_googlemap(center=c(8.4,49.6),zoom=5)
+plot2 <- ggmap(buffalo_map)+geom_point(d,aes(LONGITUDE,LATITUDE))
+plot2
+```
+
+```{r}
+plot2 <- ggplot()
+```
 Add any additional processing steps here.
 
 # Results
