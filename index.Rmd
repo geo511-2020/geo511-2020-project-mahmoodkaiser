@@ -36,7 +36,7 @@ data=read_csv("https://data.buffalony.gov/api/views/5c88-nfii/rows.csv?accessTyp
 ```
 
 
-```{r}
+```{r project plot}
 plot1 <- ggplot(data,aes(LONGITUDE,LATITUDE,col=`TOW DESCRIPTION`))+geom_point()
 plot1
 ```
