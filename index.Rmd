@@ -58,6 +58,7 @@ plot1 <- ggplot(year_count,aes(Year, count)) + geom_col()
 ```{r project plot 1}
 plot1
 ```
+
 # PLOT 2
 
 ```{r project plot 2}
@@ -70,7 +71,7 @@ plot2 #need to modify the map
 # Results
 Transform the data to the spatial data prepared for the interactive map.
 
-```{r}
+```{r interactive map}
 new_data <- data %>% filter(LONGITUDE!="NA"|LATITUDE!="NA")
 m <- leaflet(new_data) %>% 
    addTiles() %>% 
