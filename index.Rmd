@@ -51,14 +51,18 @@ tow_reason
 Police_district <- data2 %>% group_by(`POLICE DISTRICT`) %>% summarize(count=n())
 Police_district
 year_count <- data2 %>% group_by(Year) %>% summarize(count=n())
-ggplot(year_count,aes(Year, count)) + geom_col()
+plot1 <- ggplot(year_count,aes(Year, count)) + geom_col()
 
 ```
-
-
-```{r project plot}
-plot1 <- ggplot(data,aes(LONGITUDE,LATITUDE,col=`TOW DESCRIPTION`))+geom_point()
+# PLOT 1
+```{r project plot 1}
 plot1
+```
+# PLOT 2
+
+```{r project plot 2}
+plot2 <- ggplot(data,aes(LONGITUDE,LATITUDE,col=`TOW DESCRIPTION`))+geom_point()
+plot2 #need to modify the map
 ```
 
 
