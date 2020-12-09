@@ -115,6 +115,8 @@ plot3
 dygraph(tow_xts,main="Daily Tow count in Buffalo, NY")%>%
   dyRangeSelector(dateWindow = c("2007-01-01", "2019-03-26"))
 ```
+*Please change range of time in the bottom to get more specific time data*
+
 
 
 ## *Showing Tow in interactive Map*
@@ -131,6 +133,8 @@ all_tow <- leaflet(new_data) %>%
    #addProviderTiles("NASAGIBS.ViirsEarthAtNight2012")
 all_tow
 ```
+*Please zoom in/out to see the location of towing*
+
 
 
 ## *Towing related to Accidents*
@@ -147,6 +151,9 @@ accident_tow <- leaflet(accident) %>%
    #addProviderTiles("NASAGIBS.ViirsEarthAtNight2012")
 accident_tow
 ```
+*Please zoom in/out to see the location of towing related to accident*
+
+
 
 # **Conclusions**
 
