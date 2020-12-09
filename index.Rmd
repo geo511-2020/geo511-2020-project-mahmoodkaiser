@@ -30,15 +30,29 @@ library(ggmap)
 library(sf)
 library(sp)
 library(kableExtra)
+
+library(htmlwidgets)
+library(widgetframe)
+library(rnoaa)
+library(xts)
+library(dygraphs)
 ```
 
 ## Download and clean all required data
 ```{r, message=F, warning=F}
 data=read_csv("https://data.buffalony.gov/api/views/5c88-nfii/rows.csv?accessType=DOWNLOAD")
 
-data2 <- separate(data, col = `TOW DATE`, into = c("Month","Date", "Year"), sep = "/") %>%
-  select(Month, Date, Year,`TOW DESCRIPTION`, LATITUDE, LONGITUDE, `POLICE DISTRICT`) %>%
+data2 <- separate(data, col = `TOW DATE`, into = c("Month","Day", "Year"), sep = "/") %>%
+  select(Month, Day, Year,`TOW DESCRIPTION`, LATITUDE, LONGITUDE, `POLICE DISTRICT`) %>%
   filter(LONGITUDE!="NA"|LATITUDE!="NA")
+
+data2$Month <- as.numeric(data2$Month)
+data2$Year <- as.numeric(data2$Year)
+data2$Day <- as.numeric(data2$Day)
+data2$Date <- as.Date(with(data2, paste(Year, Month, Day,sep="-")), "%Y-%m-%d")
+
+Tow_count <- data2 %>% group_by(Date) %>% summarize(count=n())
+tow_xts <- xts(Tow_count$count,order.by = Tow_count$Date)
 
 data2 %>% 
   slice(1:10) %>% #show only 1:n rows
@@ -47,33 +61,41 @@ data2 %>%
                   c("striped", "hover", "condensed", "responsive")) #apply other formatting
 
 tow_reason <- data2 %>% group_by(`TOW DESCRIPTION`) %>% summarize(count=n())
-tow_reason
 Police_district <- data2 %>% group_by(`POLICE DISTRICT`) %>% summarize(count=n())
-Police_district
 year_count <- data2 %>% group_by(Year) %>% summarize(count=n())
-plot1 <- ggplot(year_count,aes(Year, count)) + geom_col()
+month_count <- data2 %>% group_by(Month) %>% summarize(count=n())
+accident_count <- data2 %>% filter(`TOW DESCRIPTION`=="ACCIDENT")
 
+# needs asthetic
+plot1 <- ggplot(year_count,aes(Year, count)) + geom_col() 
+plot2 <- ggplot(month_count,aes(Month, count)) + geom_col()
+
+# Show them in results
+Police_district
+tow_reason
 ```
 # PLOT 1
 ```{r project plot 1}
 plot1
-```
-
-# PLOT 2
-
-```{r project plot 2}
-plot2 <- ggplot(data,aes(LONGITUDE,LATITUDE,col=`TOW DESCRIPTION`))+geom_point()
-plot2 #need to modify the map
+plot2
 ```
 
 
 
 # Results
+
+Time series
+
+```{r time series}
+dygraph(tow_xts,main="Daily Tow count in Buffalo, NY")%>%
+  dyRangeSelector(dateWindow = c("2007-01-01", "2019-03-26"))
+```
+
 Transform the data to the spatial data prepared for the interactive map.
 
 ```{r interactive map}
 new_data <- data %>% filter(LONGITUDE!="NA"|LATITUDE!="NA")
-m <- leaflet(new_data) %>% 
+all_tow <- leaflet(new_data) %>% 
    addTiles() %>% 
    setView( lng = -78.9, lat = 42.9, zoom = 11 ) %>% 
    addCircleMarkers(lng = ~LONGITUDE,
@@ -82,7 +104,19 @@ m <- leaflet(new_data) %>%
    #addProviderTiles("Esri.WorldImagery")
    addProviderTiles("Esri.WorldTopoMap")
    #addProviderTiles("NASAGIBS.ViirsEarthAtNight2012")
-m
+all_tow
+
+accident <- accident_count %>% filter(LONGITUDE!="NA"|LATITUDE!="NA")
+accident_tow <- leaflet(accident) %>% 
+   addTiles() %>% 
+   setView( lng = -78.9, lat = 42.9, zoom = 11 ) %>% 
+   addCircleMarkers(lng = ~LONGITUDE,
+                    lat = ~LATITUDE,
+                    clusterOptions = markerClusterOptions())%>%
+   #addProviderTiles("Esri.WorldImagery")
+   addProviderTiles("Esri.WorldTopoMap")
+   #addProviderTiles("NASAGIBS.ViirsEarthAtNight2012")
+accident_tow
 ```
 Add any additional processing steps here.
 
