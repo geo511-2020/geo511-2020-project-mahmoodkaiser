@@ -2,24 +2,27 @@
 title: "Vehicle Towing in Buffalo"
 author: Kaiser Mahmood
 subtitle: Analysis in R
+output:
+  html_document:
+    code_folding: show
 ---
 
-# Introduction
+# **Introduction**
 
 Towing of vehicles is a huge problem and there may be a lot of factor that could influence towing. In this project I tried to explore the towing data in buffalo to figure out any potential spatial relation of towing with location, and roadway and demographic characteristics.
 
-# Materials and methods
+# **Materials and methods**
 
 You can do numbers like this:
 
 1. Getting associated data
 2. Data cleaning
-3. Getting Spatial map
+3. Getting interactive map
 
 
 Load any required packages in a code chunk (you may need to install some packages):
 
-```{r, message=F, warning=F}
+```{r Loading Library, results = 'hide', message=F, warning=F, echo=TRUE}
 library(ggplot2)
 library(tidyverse)
 library(dplyr)
@@ -30,7 +33,6 @@ library(ggmap)
 library(sf)
 library(sp)
 library(kableExtra)
-
 library(htmlwidgets)
 library(widgetframe)
 library(rnoaa)
@@ -38,8 +40,8 @@ library(xts)
 library(dygraphs)
 ```
 
-## Download and clean all required data
-```{r, message=F, warning=F}
+## **Download and clean all required data**
+```{r data cleaning, results = 'hide', message = F, warning = F,echo=TRUE}
 data=read_csv("https://data.buffalony.gov/api/views/5c88-nfii/rows.csv?accessType=DOWNLOAD")
 
 data2 <- separate(data, col = `TOW DATE`, into = c("Month","Day", "Year"), sep = "/") %>%
@@ -54,46 +56,69 @@ data2$Date <- as.Date(with(data2, paste(Year, Month, Day,sep="-")), "%Y-%m-%d")
 Tow_count <- data2 %>% group_by(Date) %>% summarize(count=n())
 tow_xts <- xts(Tow_count$count,order.by = Tow_count$Date)
 
-data2 %>% 
-  slice(1:10) %>% #show only 1:n rows
+#data2 %>% 
+#  slice(1:10) %>% #show only 1:n rows
+#  kable(digits=2,align="c")%>% #make table and round to two digits
+#  kable_styling(bootstrap_options = 
+#                  c("striped", "hover", "condensed", "responsive")) #apply other formatting
+
+tow_reason <- data2 %>% group_by(`TOW DESCRIPTION`) %>% summarize(count=n()) %>% rename("Number of Tows"=count)
+Police_district <- data2 %>% group_by(`POLICE DISTRICT`) %>% summarize(count=n()) %>% rename("Number of Tows"=count)
+year_count <- data2 %>% group_by(Year) %>% summarize(count=n()) %>% rename("Number of Tows"=count)
+month_count <- data2 %>% group_by(Month) %>% summarize(count=n()) %>% rename("Number of Tows"=count)
+accident_count <- data2 %>% filter(`TOW DESCRIPTION`=="ACCIDENT")
+#month_year <- data2 %>% group_by(Month, Year) %>% summarize(count=n())
+
+data2$Month <- as.factor(data2$Month)
+levels(data2$Month) <- c("Jan", "Feb","Mar", "Apr", "May", "Jun", "July", "Aug", "Sep", "Oct","Nov", "Dec")
+month_year <- data2 %>% group_by(Month, Year) %>% summarize(count=n()) %>% rename("Number of Tows"=count)
+
+# needs asthetic
+plot1 <- ggplot(year_count,aes(Year, `Number of Tows`)) + geom_col() 
+plot2 <- ggplot(month_year,aes(Month, `Number of Tows`)) + geom_col()
+plot3 <- ggplot(month_year,aes(Month,`Number of Tows`)) + geom_col() + facet_wrap(~Year)
+```
+
+
+
+# **Results**
+
+## *Number of Tow in different Police district*
+```{r Police district, message = F, warning = F,echo=FALSE}
+Police_district %>% 
+  kable(digits=2,align="c")%>% #make table and round to two digits
+  kable_styling(bootstrap_options = 
+                  c("striped", "hover", "condensed", "responsive"))
+```
+
+## *Reasons for Towing*
+```{r Towing reason, message=F, warning=F,echo=FALSE}
+tow_reason %>% 
   kable(digits=2,align="c")%>% #make table and round to two digits
   kable_styling(bootstrap_options = 
                   c("striped", "hover", "condensed", "responsive")) #apply other formatting
-
-tow_reason <- data2 %>% group_by(`TOW DESCRIPTION`) %>% summarize(count=n())
-Police_district <- data2 %>% group_by(`POLICE DISTRICT`) %>% summarize(count=n())
-year_count <- data2 %>% group_by(Year) %>% summarize(count=n())
-month_count <- data2 %>% group_by(Month) %>% summarize(count=n())
-accident_count <- data2 %>% filter(`TOW DESCRIPTION`=="ACCIDENT")
-
-# needs asthetic
-plot1 <- ggplot(year_count,aes(Year, count)) + geom_col() 
-plot2 <- ggplot(month_count,aes(Month, count)) + geom_col()
-
-# Show them in results
-Police_district
-tow_reason
 ```
-# PLOT 1
-```{r project plot 1}
+
+## *Yearly Towing Counts*
+```{r yearly variation plot,  message = F, warning = F,echo=FALSE}
 plot1
-plot2
 ```
 
+## *Monthly Variation in Tow Counts*
+```{r monthy variation plot, message = F, warning = F,echo=FALSE}
+plot2
+plot3
+```
 
-
-# Results
-
-Time series
-
-```{r time series}
+## *Time series Plot of Daily Towing count in Buffalo*
+```{r time series Plot, message = F, warning = F,echo=FALSE}
 dygraph(tow_xts,main="Daily Tow count in Buffalo, NY")%>%
   dyRangeSelector(dateWindow = c("2007-01-01", "2019-03-26"))
 ```
 
-Transform the data to the spatial data prepared for the interactive map.
 
-```{r interactive map}
+## *Showing Tow in interactive Map*
+```{r interactive map, message = F, warning = F,echo=FALSE}
 new_data <- data %>% filter(LONGITUDE!="NA"|LATITUDE!="NA")
 all_tow <- leaflet(new_data) %>% 
    addTiles() %>% 
@@ -105,7 +130,11 @@ all_tow <- leaflet(new_data) %>%
    addProviderTiles("Esri.WorldTopoMap")
    #addProviderTiles("NASAGIBS.ViirsEarthAtNight2012")
 all_tow
+```
 
+
+## *Towing related to Accidents*
+```{r interactive map accident, message = F, warning = F,echo=FALSE}
 accident <- accident_count %>% filter(LONGITUDE!="NA"|LATITUDE!="NA")
 accident_tow <- leaflet(accident) %>% 
    addTiles() %>% 
@@ -118,15 +147,11 @@ accident_tow <- leaflet(accident) %>%
    #addProviderTiles("NASAGIBS.ViirsEarthAtNight2012")
 accident_tow
 ```
-Add any additional processing steps here.
+
+# **Conclusions**
 
 
 
-
-# Conclusions
-
-
-
-# References
+# **References**
 
 
