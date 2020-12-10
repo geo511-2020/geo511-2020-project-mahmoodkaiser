@@ -43,7 +43,9 @@ library(dygraphs)
 ## **Download and clean all required data**
 ```{r data cleaning, results = 'hide', message = F, warning = F,echo=TRUE}
 data=read_csv("https://data.buffalony.gov/api/views/5c88-nfii/rows.csv?accessType=DOWNLOAD")
+If you'd be interested in evaluating tow incidents by neighborhood rather than district, a good resource is https://data.buffalony.gov/Economic-Neighborhood-Development/Neighborhoods/q9bk-zu3p
 
+With the neighborhood geojson, you would just need to join the tow incidents by latitude aand longitude
 data2 <- separate(data, col = `TOW DATE`, into = c("Month","Day", "Year"), sep = "/") %>%
   select(Month, Day, Year,`TOW DESCRIPTION`, LATITUDE, LONGITUDE, `POLICE DISTRICT`) %>%
   filter(LONGITUDE!="NA"|LATITUDE!="NA")
@@ -76,7 +78,7 @@ month_year <- data2 %>% group_by(Month, Year) %>% summarize(count=n()) %>% renam
 # needs asthetic
 plot1 <- ggplot(year_count,aes(Year, `Number of Tows`)) + geom_col() 
 plot2 <- ggplot(month_year,aes(Month, `Number of Tows`)) + geom_col()
-plot3 <- ggplot(month_year,aes(Month,`Number of Tows`)) + geom_col() + facet_wrap(~Year)
+plot3 <- ggplot(month_year,aes(Month,`Number of Tows`)) + geom_col() + facet_wrap(~Year) I really liked the maps you used for your project!
 ```
 
 
@@ -88,7 +90,7 @@ plot3 <- ggplot(month_year,aes(Month,`Number of Tows`)) + geom_col() + facet_wra
 Police_district %>% 
   kable(digits=2,align="c")%>% #make table and round to two digits
   kable_styling(bootstrap_options = 
-                  c("striped", "hover", "condensed", "responsive"))
+                  c("striped", "hover", "condensed", "responsive")) like I said earlier, it might be a bit easier to compare your data by neighborhood as that might be a bit more familiar to most people
 ```
 
 ## *Reasons for Towing*
