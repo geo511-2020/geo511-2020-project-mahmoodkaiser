@@ -13,7 +13,7 @@ Towing of vehicles is a huge problem and there may be a lot of factor that could
 
 # **Materials and methods**
 
-You can do numbers like this:
+You can do numbers like this:S
 
 1. Getting associated data
 2. Data cleaning
@@ -111,7 +111,7 @@ plot3
 ```
 
 ## *Time series Plot of Daily Towing count in Buffalo*
-```{r time series Plot, message = F, warning = F,echo=FALSE}
+```{r time series Plot, message = F, warning = F,echo=TRUE}
 dygraph(tow_xts,main="Daily Tow count in Buffalo, NY")%>%
   dyRangeSelector(dateWindow = c("2007-01-01", "2019-03-26"))
 ```
@@ -120,7 +120,7 @@ dygraph(tow_xts,main="Daily Tow count in Buffalo, NY")%>%
 
 
 ## *Showing Tow in interactive Map*
-```{r interactive map, message = F, warning = F,echo=FALSE}
+```{r interactive map, message = F, warning = F,echo=TRUE}
 new_data <- data %>% filter(LONGITUDE!="NA"|LATITUDE!="NA")
 all_tow <- leaflet(new_data) %>% 
    addTiles() %>% 
@@ -138,7 +138,7 @@ all_tow
 
 
 ## *Towing related to Accidents*
-```{r interactive map accident, message = F, warning = F,echo=FALSE}
+```{r interactive map accident, message = F, warning = F,echo=TRUE}
 accident <- accident_count %>% filter(LONGITUDE!="NA"|LATITUDE!="NA")
 accident_tow <- leaflet(accident) %>% 
    addTiles() %>% 
@@ -156,9 +156,11 @@ accident_tow
 
 
 # **Conclusions**
-
+A lot of the Tows are happening because of the accidents. If we look at the location of the tows related to accidents we can see that the accidents are occuring mostly at the intersection.Also the number of tows are increasing over the year.We can see from the table that police district D and E have the most number of tows.
+For seasonal variation we can look at the histogram of tows with respect to the months.We can see from the histogram that january has a lot of tow occurance and then there is a decrease and then another increase in around july to august and then again decreasing gradually. December-january are the start of snow season. That's why I think there in an increase in the number of tows. Then people might get used to snow and the number of tow decrease. July, august are the time of summer and fall and people usually go out and make more recreational trips around this time which might be the reason for increase in trips.
 
 
 # **References**
 
-
+1. https://data.buffalony.gov/Transportation/Tows/5c88-nfii
+2. DataCamp course list:
